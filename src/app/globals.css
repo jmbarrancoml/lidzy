@@ -38,3 +38,4 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:3px solid var(-
 .controlled-mac-model{height:440px;position:relative;opacity:0;transition:opacity .35s,filter .15s}.controlled-mac-model.is-ready,.controlled-mac-model.is-error{opacity:1}.controlled-mac-model canvas{touch-action:pan-y}.demo-feature>.controlled-mac-model{align-self:end}
 @media(max-width:900px){.controlled-mac-model{height:340px}}
 @media(prefers-reduced-motion:reduce){.controlled-mac-model{transition:none}}
+@media(prefers-reduced-motion:reduce){.hero{height:100svh;min-height:0}.hero-sticky{position:relative}}
