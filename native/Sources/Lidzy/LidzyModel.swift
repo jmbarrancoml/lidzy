@@ -1,5 +1,6 @@
 import Foundation
 import IOKit.hid
+import CoreGraphics
 
 enum EffectStyle: String, CaseIterable, Identifiable { case silk = "Silk", shade = "Shade", frost = "Frost"; var id: Self { self } }
 struct EffectValues: Equatable {
@@ -11,7 +12,14 @@ struct EffectValues: Equatable {
 }
 @MainActor final class LidzyModel: ObservableObject {
     @Published var angle = 90.0 { didSet { applyEffect() } }
-    @Published var isEnabled = false { didSet { applyEffect() } }
+    @Published var isEnabled = false {
+        didSet {
+            if isEnabled && !CGPreflightScreenCaptureAccess() {
+                CGRequestScreenCaptureAccess()
+            }
+            applyEffect()
+        }
+    }
     @Published var style: EffectStyle = .silk { didSet { applyEffect() } }
     @Published var followsSensor = true
     @Published var sensorAvailable = false

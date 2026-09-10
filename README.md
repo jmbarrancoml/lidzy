@@ -31,16 +31,16 @@ cd native
 swift run Lidzy
 ```
 
-macOS asks for Screen Recording permission on first launch. Quit and reopen Lidzy after granting it.
+Open Lidzy from the menu bar and switch on **Follow lid**. macOS then asks for Screen Recording permission. Quit and reopen Lidzy after granting it.
 
 ## Install a release
 
 1. Download `Lidzy-0.1.0-macos.zip` from [Releases](https://github.com/jmbarrancoml/lidzy/releases).
 2. Extract the archive and drag `Lidzy.app` into Applications.
 3. Control-click Lidzy and choose **Open** on the first launch. The current preview uses ad-hoc signing.
-4. Allow Screen Recording in **System Settings → Privacy & Security → Screen Recording**.
-5. Quit and reopen Lidzy. Its MacBook icon appears in the menu bar.
-6. Open the menu and switch on **Follow lid**. Lidzy starts capture only while the lid is below the effect threshold.
+4. Click Lidzy's menu bar icon and switch on **Follow lid** to request Screen Recording access.
+5. Allow Lidzy in **System Settings → Privacy & Security → Screen Recording**.
+6. Quit and reopen Lidzy, then switch on **Follow lid** again. Lidzy captures only while the lid is below the effect threshold.
 
 Open the menu bar item to pause the effect, select Silk, Shade or Frost, and open Settings. Move the lid slowly to see the desktop follow it. Press **Quit Lidzy** from the menu when you finish.
 
