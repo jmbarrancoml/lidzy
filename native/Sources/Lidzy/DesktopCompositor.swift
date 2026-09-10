@@ -49,11 +49,11 @@ final class DesktopCompositor: NSObject, SCStreamOutput {
             configuration.pixelFormat = kCVPixelFormatType_32BGRA
 
             let stream = SCStream(filter: filter, configuration: configuration, delegate: nil)
-            try stream.addStreamOutput(self, type: .screen, sampleHandlerQueue: DispatchQueue(label: "app.hinge.capture", qos: .userInteractive))
+            try stream.addStreamOutput(self, type: .screen, sampleHandlerQueue: DispatchQueue(label: "app.lidzy.capture", qos: .userInteractive))
             try await stream.startCapture()
             self.stream = stream
         } catch {
-            NSLog("Hinge could not start screen capture: %@", error.localizedDescription)
+            NSLog("Lidzy could not start screen capture: %@", error.localizedDescription)
         }
     }
 
@@ -123,7 +123,7 @@ final class DesktopCompositor: NSObject, SCStreamOutput {
     private func makeBlur(radius: Double) -> CIFilter {
         let filter = CIFilter(name: "CIGaussianBlur")!
         filter.setValue(radius, forKey: kCIInputRadiusKey)
-        filter.name = "hingeBlur"
+        filter.name = "lidzyBlur"
         return filter
     }
 

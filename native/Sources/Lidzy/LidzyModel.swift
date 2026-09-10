@@ -9,26 +9,26 @@ struct EffectValues: Equatable {
         return EffectValues(perspective: 0.72 + progress * 0.28, blur: style == .frost ? (1 - progress) * 24 : (1 - progress) * 5, shade: style == .shade ? (1 - progress) * 0.68 : (1 - progress) * 0.36)
     }
 }
-@MainActor final class HingeModel: ObservableObject {
+@MainActor final class LidzyModel: ObservableObject {
     @Published var angle = 90.0 { didSet { applyEffect() } }
-    @Published var isEnabled = true { didSet { applyEffect() } }
+    @Published var isEnabled = false { didSet { applyEffect() } }
     @Published var style: EffectStyle = .silk { didSet { applyEffect() } }
     @Published var followsSensor = true
     @Published var sensorAvailable = false
     private let sensor = LidAngleSensor()
     private let compositor = DesktopCompositor()
+    private var captureIsRequested = false
     init() {
         sensor.onAngle = { [weak self] angle in Task { @MainActor in guard let self, self.followsSensor else { return }; self.sensorAvailable = true; self.angle = angle } }
         sensor.start()
-        Task { await compositor.setCaptureEnabled(true) }
     }
     private func applyEffect() {
         let values = EffectValues.values(for: angle, style: style)
-        if isEnabled {
-            Task { await compositor.setCaptureEnabled(true) }
-            compositor.update(values: values, active: angle < 112)
-        } else {
-            Task { await compositor.setCaptureEnabled(false) }
+        let shouldCapture = isEnabled && angle < 112
+        compositor.update(values: values, active: shouldCapture)
+        if shouldCapture != captureIsRequested {
+            captureIsRequested = shouldCapture
+            Task { await compositor.setCaptureEnabled(shouldCapture) }
         }
     }
 }

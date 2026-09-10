@@ -20,6 +20,7 @@
 # production
 /build
 /native/.build
+/dist
 
 # misc
 .DS_Store
