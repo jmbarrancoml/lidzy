@@ -39,7 +39,7 @@ export default function Home() {
           <article><small>02</small><h3>Render in real time</h3><p>Perspective, blur and shade respond to every degree of movement, creating a natural sense of depth as your screen closes.</p></article>
           <article><small>03</small><h3>Stay private</h3><p>Everything runs on your device. Lidzy processes frames locally and never saves or uploads your screen.</p></article>
         </div>
-        <LidzyDemo variant="feature"/>
+        <LidzyDemo/>
       </div>
     </section>
 

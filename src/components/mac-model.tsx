@@ -5,13 +5,13 @@ import { Canvas, useFrame, useThree } from "@react-three/fiber";
 import { useGLTF, useTexture } from "@react-three/drei";
 import * as THREE from "three";
 
-function Laptop({ progress, onReady, onError, connectInvalidation }: { progress: React.MutableRefObject<number>; onReady: () => void; onError: () => void; connectInvalidation: (invalidate: () => void) => void }) {
+function Laptop({ progress, onReady, onError, connectInvalidation }: { progress: React.MutableRefObject<number>; onReady: () => void; onError: () => void; connectInvalidation: (invalidate: (() => void) | null) => void }) {
   const { scene } = useGLTF("/models/lidzy-macbook.glb");
   const wallpaper = useTexture("/assets/lidzy-wallpaper.png");
   const wallpaperTexture = useMemo(() => {
     const texture = wallpaper.clone();
     texture.colorSpace = THREE.SRGBColorSpace;
-    texture.flipY = false;
+    texture.flipY = true;
     texture.needsUpdate = true;
     return texture;
   }, [wallpaper]);
@@ -32,6 +32,7 @@ function Laptop({ progress, onReady, onError, connectInvalidation }: { progress:
 
   useEffect(() => {
     const disposeOwnedResources = () => {
+      connectInvalidation(null);
       model.traverse((object) => {
         if (!(object instanceof THREE.Mesh)) return;
         const materials = Array.isArray(object.material) ? object.material : [object.material];
@@ -66,10 +67,14 @@ function Laptop({ progress, onReady, onError, connectInvalidation }: { progress:
 
   useFrame(() => {
     const amount = THREE.MathUtils.smoothstep(progress.current, 0, 1);
-    if (screen.current) screen.current.rotation.x = initialRotation.current + amount * 1.43;
+    if (screen.current) screen.current.rotation.x = initialRotation.current - amount * 1.43;
   });
 
-  return <primitive object={model} scale={.045} position={[0, -.28, 0]} rotation={[0, Math.PI, 0]}/>;
+  return <primitive object={model} scale={.045} position={[0, -.28, 0]} rotation={[0, 0, 0]}/>;
+}
+
+function ModelLights() {
+  return <><ambientLight intensity={1.7}/><directionalLight position={[3, 5, 4]} intensity={3.2}/><directionalLight position={[-4, 2, 2]} intensity={1.2}/></>;
 }
 
 export function MacModel() {
@@ -80,7 +85,7 @@ export function MacModel() {
   const [reduceMotion, setReduceMotion] = useState(false);
   const handleReady = useCallback(() => setStatus("ready"), []);
   const handleError = useCallback(() => setStatus("error"), []);
-  const connectInvalidation = useCallback((next: () => void) => { invalidate.current = next; }, []);
+  const connectInvalidation = useCallback((next: (() => void) | null) => { invalidate.current = next; }, []);
 
   useEffect(() => {
     const preference = window.matchMedia("(prefers-reduced-motion: reduce)");
@@ -119,12 +124,32 @@ export function MacModel() {
   return <div ref={wrapper} className={`mac-scroll-model is-${status}`}>
     {status !== "ready" && <div className="model-loading" role="status" aria-live="polite">{status === "error" ? "3D preview unavailable" : "Loading 3D Mac…"}</div>}
     <Canvas frameloop="demand" camera={{ position: [0, .14, 2.35], fov: 30 }} dpr={[1, 1.5]} gl={{ antialias: true, alpha: true }}>
-      <ambientLight intensity={1.7}/>
-      <directionalLight position={[3, 5, 4]} intensity={3.2}/>
-      <directionalLight position={[-4, 2, 2]} intensity={1.2}/>
+      <ModelLights/>
       <Suspense fallback={null}><Laptop progress={progress} onReady={handleReady} onError={handleError} connectInvalidation={connectInvalidation}/></Suspense>
     </Canvas>
-    <div className="scroll-cue" aria-hidden="true"><span>Scroll to close</span><i/></div>
+    {!reduceMotion && <div className="scroll-cue" aria-hidden="true"><span>Scroll to close</span><i/></div>}
+  </div>;
+}
+
+export function ControlledMacModel({ progress, blur = 0, brightness = 1 }: { progress: number; blur?: number; brightness?: number }) {
+  const progressRef = useRef(progress);
+  const invalidate = useRef<(() => void) | null>(null);
+  const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
+  const handleReady = useCallback(() => setStatus("ready"), []);
+  const handleError = useCallback(() => setStatus("error"), []);
+  const connectInvalidation = useCallback((next: (() => void) | null) => { invalidate.current = next; }, []);
+
+  useEffect(() => {
+    progressRef.current = THREE.MathUtils.clamp(progress, 0, 1);
+    invalidate.current?.();
+  }, [progress]);
+
+  return <div className={`controlled-mac-model is-${status}`} style={{ filter: `blur(${blur}px) brightness(${brightness})` }}>
+    {status !== "ready" && <div className="model-loading" role="status" aria-live="polite">{status === "error" ? "3D preview unavailable" : "Loading 3D Mac…"}</div>}
+    <Canvas frameloop="demand" camera={{ position: [0, .14, 2.35], fov: 30 }} dpr={[1, 1.5]} gl={{ antialias: true, alpha: true }}>
+      <ModelLights/>
+      <Suspense fallback={null}><Laptop progress={progressRef} onReady={handleReady} onError={handleError} connectInvalidation={connectInvalidation}/></Suspense>
+    </Canvas>
   </div>;
 }
 
