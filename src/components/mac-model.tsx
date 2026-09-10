@@ -1,67 +1,131 @@
 "use client";
 
-import { createElement, useEffect, useRef, useState } from "react";
+import { Suspense, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { Canvas, useFrame, useThree } from "@react-three/fiber";
+import { useGLTF, useTexture } from "@react-three/drei";
+import * as THREE from "three";
 
-type ModelStatus = "loading" | "ready" | "error";
+function Laptop({ progress, onReady, onError, connectInvalidation }: { progress: React.MutableRefObject<number>; onReady: () => void; onError: () => void; connectInvalidation: (invalidate: () => void) => void }) {
+  const { scene } = useGLTF("/models/lidzy-macbook.glb");
+  const wallpaper = useTexture("/assets/lidzy-wallpaper.png");
+  const wallpaperTexture = useMemo(() => {
+    const texture = wallpaper.clone();
+    texture.colorSpace = THREE.SRGBColorSpace;
+    texture.flipY = false;
+    texture.needsUpdate = true;
+    return texture;
+  }, [wallpaper]);
+  const screen = useRef<THREE.Object3D | null>(null);
+  const initialRotation = useRef(0);
+  const { invalidate } = useThree();
+
+  const model = useMemo(() => {
+    const clone = scene.clone(true);
+    clone.traverse((object) => {
+      if (!(object instanceof THREE.Mesh)) return;
+      object.material = Array.isArray(object.material)
+        ? object.material.map((material) => material.clone())
+        : object.material.clone();
+    });
+    return clone;
+  }, [scene]);
+
+  useEffect(() => {
+    const disposeOwnedResources = () => {
+      model.traverse((object) => {
+        if (!(object instanceof THREE.Mesh)) return;
+        const materials = Array.isArray(object.material) ? object.material : [object.material];
+        for (const material of materials) material.dispose();
+      });
+      wallpaperTexture.dispose();
+    };
+    const lid = model.getObjectByName("Screen");
+    screen.current = lid ?? null;
+    if (!lid) {
+      onError();
+      return disposeOwnedResources;
+    }
+    initialRotation.current = lid.rotation.x;
+    lid.traverse((object) => {
+      if (!(object instanceof THREE.Mesh)) return;
+      const meshMaterials = Array.isArray(object.material) ? object.material : [object.material];
+      for (const material of meshMaterials) {
+        if (!(material instanceof THREE.MeshStandardMaterial)) continue;
+        material.map = wallpaperTexture;
+        material.emissiveMap = wallpaperTexture;
+        material.emissive = new THREE.Color(0xffffff);
+        material.emissiveIntensity = .75;
+        material.needsUpdate = true;
+      }
+    });
+    connectInvalidation(invalidate);
+    onReady();
+    invalidate();
+    return disposeOwnedResources;
+  }, [connectInvalidation, invalidate, model, onError, onReady, wallpaperTexture]);
+
+  useFrame(() => {
+    const amount = THREE.MathUtils.smoothstep(progress.current, 0, 1);
+    if (screen.current) screen.current.rotation.x = initialRotation.current + amount * 1.43;
+  });
+
+  return <primitive object={model} scale={.045} position={[0, -.28, 0]} rotation={[0, Math.PI, 0]}/>;
+}
 
 export function MacModel() {
-  const modelRef = useRef<HTMLElement | null>(null);
-  const [moduleReady, setModuleReady] = useState(false);
-  const [status, setStatus] = useState<ModelStatus>("loading");
+  const progress = useRef(0);
+  const invalidate = useRef<(() => void) | null>(null);
+  const wrapper = useRef<HTMLDivElement | null>(null);
+  const [status, setStatus] = useState<"loading" | "ready" | "error">("loading");
   const [reduceMotion, setReduceMotion] = useState(false);
+  const handleReady = useCallback(() => setStatus("ready"), []);
+  const handleError = useCallback(() => setStatus("error"), []);
+  const connectInvalidation = useCallback((next: () => void) => { invalidate.current = next; }, []);
 
   useEffect(() => {
     const preference = window.matchMedia("(prefers-reduced-motion: reduce)");
     const updatePreference = () => setReduceMotion(preference.matches);
     updatePreference();
     preference.addEventListener("change", updatePreference);
-    void import("@google/model-viewer")
-      .then(() => setModuleReady(true))
-      .catch(() => setStatus("error"));
     return () => preference.removeEventListener("change", updatePreference);
   }, []);
 
   useEffect(() => {
-    const model = modelRef.current;
-    if (!moduleReady || !model) return;
-    const handleLoad = () => setStatus("ready");
-    const handleError = () => setStatus("error");
-    if ((model as HTMLElement & { loaded?: boolean }).loaded) handleLoad();
-    model.addEventListener("load", handleLoad);
-    model.addEventListener("error", handleError);
-    return () => {
-      model.removeEventListener("load", handleLoad);
-      model.removeEventListener("error", handleError);
+    const hero = document.getElementById("top");
+    if (!hero) return;
+    let frame = 0;
+    const update = () => {
+      frame = 0;
+      const viewportHeight = hero.querySelector<HTMLElement>(".hero-sticky")?.clientHeight ?? window.innerHeight;
+      const travel = Math.max(1, hero.offsetHeight - viewportHeight);
+      const amount = reduceMotion ? 0 : THREE.MathUtils.clamp(-hero.getBoundingClientRect().top / travel, 0, 1);
+      progress.current = amount;
+      wrapper.current?.style.setProperty("--scroll-progress", String(amount));
+      wrapper.current?.style.setProperty("--scroll-blur", reduceMotion ? "0px" : `${amount * 1.5}px`);
+      wrapper.current?.style.setProperty("--scroll-brightness", String(reduceMotion ? 1 : 1 - amount * .42));
+      invalidate.current?.();
     };
-  }, [moduleReady]);
+    const onScroll = () => { if (!frame) frame = requestAnimationFrame(update); };
+    update();
+    window.addEventListener("scroll", onScroll, { passive: true });
+    window.addEventListener("resize", onScroll);
+    return () => {
+      window.removeEventListener("scroll", onScroll);
+      window.removeEventListener("resize", onScroll);
+      if (frame) cancelAnimationFrame(frame);
+    };
+  }, [reduceMotion]);
 
-  const motionProps = reduceMotion ? {} : {
-    "auto-rotate": true,
-    "auto-rotate-delay": 1200,
-    "rotation-per-second": "8deg",
-  };
-
-  return <div className={`mac-model is-${status}`}>
-    {status !== "ready" && <div className="model-placeholder" role="status" aria-live="polite">
-      <span>{status === "error" ? "3D preview unavailable" : "Loading 3D Mac…"}</span>
-    </div>}
-    {createElement("model-viewer", {
-      ref: modelRef,
-      src: "/models/lidzy-macbook.glb",
-      poster: "/assets/lidzy-wallpaper.png",
-      alt: "Interactive 3D model of an open aluminum laptop",
-      "camera-controls": true,
-      ...motionProps,
-      "camera-orbit": "18deg 72deg 75%",
-      "min-camera-orbit": "auto 55deg 55%",
-      "max-camera-orbit": "auto 88deg 125%",
-      "shadow-intensity": "1.4",
-      "shadow-softness": ".7",
-      exposure: "1.05",
-      loading: "lazy",
-      reveal: "auto",
-      style: { width: "100%", height: "100%", background: "transparent" },
-    }, createElement("div", { slot: "progress-bar", className: "model-progress" }))}
-    <p>Drag to inspect · Scroll to zoom</p>
+  return <div ref={wrapper} className={`mac-scroll-model is-${status}`}>
+    {status !== "ready" && <div className="model-loading" role="status" aria-live="polite">{status === "error" ? "3D preview unavailable" : "Loading 3D Mac…"}</div>}
+    <Canvas frameloop="demand" camera={{ position: [0, .14, 2.35], fov: 30 }} dpr={[1, 1.5]} gl={{ antialias: true, alpha: true }}>
+      <ambientLight intensity={1.7}/>
+      <directionalLight position={[3, 5, 4]} intensity={3.2}/>
+      <directionalLight position={[-4, 2, 2]} intensity={1.2}/>
+      <Suspense fallback={null}><Laptop progress={progress} onReady={handleReady} onError={handleError} connectInvalidation={connectInvalidation}/></Suspense>
+    </Canvas>
+    <div className="scroll-cue" aria-hidden="true"><span>Scroll to close</span><i/></div>
   </div>;
 }
+
+useGLTF.preload("/models/lidzy-macbook.glb");

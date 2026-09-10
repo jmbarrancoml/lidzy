@@ -16,7 +16,7 @@ export default function Home() {
   return <main>
     <a className="skip-link" href="#main-content">Skip to content</a>
     <section className="hero" id="top">
-      <Nav/>
+      <div className="hero-sticky"><Nav/>
       <div className="hero-main page-grid" id="main-content">
         <div className="hero-copy">
           <h1>Your desktop<br/>follows the lid.</h1>
@@ -26,7 +26,7 @@ export default function Home() {
         <div className="hero-mantra"><span>A more<br/>natural<br/>goodbye.</span><i/></div>
         <figure className="hinge-photo"><Image src="/assets/lidzy-hinge.png" alt="Close view of a laptop hinge" fill priority sizes="18vw"/><figcaption>SMALL MOVEMENTS.<br/>A BRIGHTER DESKTOP.</figcaption></figure>
         <div className="hero-laptop"><MacModel/></div>
-      </div>
+      </div></div>
     </section>
 
     <section className="features" id="features">
