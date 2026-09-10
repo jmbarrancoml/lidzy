@@ -53,6 +53,10 @@ Open the menu bar item to pause the effect, select Silk, Shade or Frost, and ope
 
 The sensor implementation builds on the HID discovery documented by [Sam Henri Gold's LidAngleSensor](https://github.com/samhenrigold/LidAngleSensor).
 
+## Privacy
+
+Lidzy processes captured screen frames in memory on your Mac. It does not save or upload frames, and it starts ScreenCaptureKit only while the effect is enabled and the lid sits below the activation threshold.
+
 ## License
 
 [MIT](LICENSE)
