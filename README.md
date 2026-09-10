@@ -49,6 +49,10 @@ Open the menu bar item to pause the effect, select Silk, Shade or Frost, and ope
 - `src/`: Next.js website and interactive browser demo
 - `native/`: SwiftUI menu bar app, sensor reader and ScreenCaptureKit compositor
 
+## 3D asset
+
+The website uses ["Laptop" by Aullwen](https://sketchfab.com/3d-models/laptop-7d870e900889481395b4a575b9fa8c3e), licensed under [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/). See the [asset license](public/models/LICENSE.md) for redistribution details.
+
 ## Acknowledgements
 
 The sensor implementation builds on the HID discovery documented by [Sam Henri Gold's LidAngleSensor](https://github.com/samhenrigold/LidAngleSensor).

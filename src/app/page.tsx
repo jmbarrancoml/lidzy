@@ -1,5 +1,6 @@
 import Image from "next/image";
 import { LidzyDemo } from "@/components/lidzy-demo";
+import { MacModel } from "@/components/mac-model";
 
 const githubUrl = "https://github.com/jmbarrancoml/lidzy";
 
@@ -24,7 +25,7 @@ export default function Home() {
         </div>
         <div className="hero-mantra"><span>A more<br/>natural<br/>goodbye.</span><i/></div>
         <figure className="hinge-photo"><Image src="/assets/lidzy-hinge.png" alt="Close view of a laptop hinge" fill priority sizes="18vw"/><figcaption>SMALL MOVEMENTS.<br/>A BRIGHTER DESKTOP.</figcaption></figure>
-        <div className="hero-laptop"><LidzyDemo variant="hero"/></div>
+        <div className="hero-laptop"><MacModel/></div>
       </div>
     </section>
 
@@ -65,7 +66,7 @@ export default function Home() {
 14  }`}</code></pre>
           <div className="open-copy" id="download"><h3>Lidzy is open source.<br/>A small utility, a more open Mac.</h3><p>The source is available on GitHub under the MIT License. Read it, learn from it, suggest improvements, or make it your own.</p><p className="requirements-label">Requirements</p><ul><li>macOS 14 or later</li><li>Apple silicon MacBook</li><li>Screen Recording permission</li></ul><div className="download-actions"><a className="button" href={`${githubUrl}/releases/latest`}>↓ <span>Download latest release</span></a><a className="text-link" href={githubUrl}>Browse the source　→</a></div></div>
         </div>
-        <footer><a className="brand" href="#top"><Mark/>Lidzy</a><nav><a href={githubUrl}>GitHub</a><a href={`${githubUrl}/blob/main/LICENSE`}>License</a><a href={`${githubUrl}/blob/main/README.md#privacy`}>Privacy</a></nav></footer>
+        <footer><a className="brand" href="#top"><Mark/>Lidzy</a><nav><a href={githubUrl}>GitHub</a><a href={`${githubUrl}/blob/main/LICENSE`}>License</a><a href={`${githubUrl}/blob/main/README.md#privacy`}>Privacy</a><a href="https://sketchfab.com/3d-models/laptop-7d870e900889481395b4a575b9fa8c3e">3D model: Aullwen, CC BY 4.0</a></nav></footer>
       </div>
     </section>
   </main>;

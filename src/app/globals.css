@@ -27,3 +27,10 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:3px solid var(-
 @media(max-width:900px){.hero-control{opacity:1;width:80%;margin-top:14px}.eyebrow{font-size:12px}.motion-note p{font-size:13px}.open footer nav{font-size:12px}}
 .lock{position:absolute}.dock{position:absolute}
 .hinge-photo figcaption,.motion-note small{font-size:11px}.ticks,.open-kicker>span,.requirements-label,.open footer nav{font-size:12px}
+
+.mac-model{height:640px;position:relative;opacity:0;transform:translateY(18px);transition:opacity .6s ease,transform .6s ease}.mac-model.is-ready{opacity:1;transform:none}.mac-model p{position:absolute;left:50%;bottom:24px;transform:translateX(-50%);margin:0;font:11px var(--font-mono);letter-spacing:.14em;text-transform:uppercase;color:var(--muted);white-space:nowrap}.mac-model model-viewer{--poster-color:transparent;cursor:grab}.mac-model model-viewer:active{cursor:grabbing}
+@media(max-width:900px){.mac-model{height:370px}.mac-model p{bottom:8px;font-size:10px}}
+.model-progress{display:none}
+.model-placeholder{position:absolute;inset:8% 8% 14%;display:grid;place-items:center;background:url('/assets/lidzy-wallpaper.png') center/cover;border:12px solid #111;border-radius:20px;opacity:1;transition:opacity .3s;overflow:hidden}.model-placeholder:after{content:"";position:absolute;inset:0;background:#f5f4efaa}.model-placeholder span{position:relative;z-index:1;padding:10px 14px;background:var(--paper);font:11px var(--font-mono);letter-spacing:.12em;text-transform:uppercase}.mac-model model-viewer{position:relative;z-index:2;opacity:0;transition:opacity .35s}.mac-model.is-ready model-viewer{opacity:1}.mac-model.is-ready .model-placeholder{opacity:0}.mac-model.is-error{opacity:1;transform:none}.mac-model.is-error model-viewer{display:none}
+.mac-model.is-loading{opacity:1;transform:none}
+@media(prefers-reduced-motion:reduce){.mac-model,.mac-model model-viewer,.model-placeholder{transition:none}}
