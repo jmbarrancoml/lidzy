@@ -8,9 +8,8 @@ type Style = "silk" | "shade" | "frost";
 export function LidzyDemo() {
   const [angle, setAngle] = useState(73);
   const [style, setStyle] = useState<Style>("silk");
-  const openProgress = angle / 120;
-  const closeProgress = 1 - openProgress;
-  const blur = style === "frost" ? closeProgress * 7 : style === "silk" ? closeProgress * 1.2 : 0;
+  const closeProgress = (120 - angle) / (120 - 20);
+  const blur = style === "frost" ? closeProgress : style === "silk" ? closeProgress * .2 : 0;
   const brightness = style === "shade" ? 1 - closeProgress * .55 : 1 - closeProgress * .2;
 
   return <div className="demo demo-feature">

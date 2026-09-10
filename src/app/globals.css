@@ -39,3 +39,4 @@ a:focus-visible,button:focus-visible,input:focus-visible{outline:3px solid var(-
 @media(max-width:900px){.controlled-mac-model{height:340px}}
 @media(prefers-reduced-motion:reduce){.controlled-mac-model{transition:none}}
 @media(prefers-reduced-motion:reduce){.hero{height:100svh;min-height:0}.hero-sticky{position:relative}}
+.mac-scroll-model{filter:none}
